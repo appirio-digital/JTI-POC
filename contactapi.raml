@@ -1,0 +1,1393 @@
+#%RAML 0.8
+title: ContactAPI
+version: '1'
+baseUri: /mobile/custom/ContactAPI/
+protocols:
+- HTTP
+schemas:
+- adf-cardinality: |
+    {
+        "type": "object",
+        "properties": {
+            "value": {
+                "type": "string",
+                "enum": [
+                    "1 to *",
+                    "1 to 1",
+                    "* to 1",
+                    "* to *"
+                ],
+                "description": "Cardinality value."
+            },
+            "sourceAttributes": {
+                "type": "string",
+                "description": "Attributes in this resource that will be mapped to the destination resource."
+            },
+            "destinationAttributes": {
+                "type": "string",
+                "description": "Attributes in the destination resource that will be mapped to this resource."
+            }
+        },
+        "description": "Represents the cardinality between the resources connected by the link.",
+        "required": [
+            "value",
+            "sourceAttributes",
+            "destinationAttributes"
+        ]
+    }
+- adf-link-change-indicator: |
+    {
+        "type": "object",
+        "properties": {
+            "changeIndicator": {
+                "type": "string",
+                "description": "Represents the current state of the resource."
+            }
+        },
+        "description": "Additional properties."
+    }
+- adf-link: |
+    {
+        "type": "object",
+        "properties": {
+            "rel": {
+                "type": "string",
+                "enum": [
+                    "self",
+                    "lov",
+                    "describe",
+                    "parent",
+                    "child",
+                    "enclosure",
+                    "predecessor-version",
+                    "successor-version",
+                    "current",
+                    "external"
+                ],
+                "description": "Represents the relationship type between this resource and the resource which the link is pointing to."
+            },
+            "href": {
+                "type": "string",
+                "description": "Either a URI [RFC3986] or a URI Template [RFC6570]."
+            },
+            "name": {
+                "type": "string",
+                "description": "Link name, can be used as a unique identifier for the link."
+            },
+            "kind": {
+                "type": "string",
+                "enum": [
+                    "item",
+                    "collection",
+                    "describe",
+                    "other"
+                ],
+                "description": "Identifies the kind of resource returned by this link."
+            },
+            "properties": {
+                "$ref": "adf-link-change-indicator"
+            },
+            "cardinality": {
+                "$ref": "adf-cardinality"
+            }
+        },
+        "required": [
+            "rel",
+            "href",
+            "name"
+        ]
+    }
+- adf-links: |
+    {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "id": "http://www.oracle.com/adfm/draft02/links.json#",
+        "type": "array",
+        "title": "Links representation",
+        "description": "Represents all the connections between the current resource and other resources.",
+        "items": {
+            "$ref": "adf-link"
+        }
+    }
+- adf-resource: |
+    {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "title": "Basic representation of a single resource item",
+        "description": "Basic and generic representation of a single resource item served by the ADFm RESTful Service.",
+        "properties": {
+            "links": {
+                "$ref": "adf-links"
+            }
+        }
+    }
+- adf-resource-collection: |
+    {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "title": "Resource Collection",
+        "description": "Basic and generic representation of a resource collection served by the ADFm RESTful Service",
+        "properties": {
+            "totalResults": {
+                "type": "number",
+                "description": "Estimate the total number of resources"
+            },
+            "count": {
+                "type": "number",
+                "description": "Number of resources returned in the 'items' array."
+            },
+            "hasMore": {
+                "type": "boolean",
+                "description": "Indicates if there are more resources that can be fetched. Useful for pagination."
+            },
+            "limit": {
+                "type": "number",
+                "defaultValue": 25,
+                "minimum": 1,
+                "description": "Indicates the limit that was set before obtaining this collection. A collection never returns 'count' bigger than 'limit'."
+            },
+            "offset": {
+                "type": "number",
+                "defaultValue": 0,
+                "minimum": 0,
+                "description": "Starting offset for this collection."
+            },
+            "links": {
+                "$ref": "adf-links"
+            }
+        },
+        "required": [
+            "items",
+            "count",
+            "hasMore",
+            "limit",
+            "offset",
+            "links"
+        ]
+    }
+- contacts-attributes: |
+    {
+      "$schema" : "http://json-schema.org/draft-04/schema#",
+      "type" : "object",
+      "title" : "Contact",
+      "properties" : {
+        "PartyId" : {
+          "type" : "integer",
+          "description" : "Party ID",
+          "multipleOf" : 1,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "PartyNumber" : {
+          "type" : "string",
+          "description" : "Party Number",
+          "maxLength" : 30,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "SourceSystem" : {
+          "type" : "string",
+          "description" : "Party Source System",
+          "maxLength" : 0,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "SourceSystemReferenceValue" : {
+          "type" : "string",
+          "description" : "Party Source System Reference Value",
+          "maxLength" : 0,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "AccountPartyId" : {
+          "type" : "integer",
+          "description" : "Related Account Party ID",
+          "multipleOf" : 1,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "AccountPartyNumber" : {
+          "type" : "string",
+          "description" : "Related Account Party Number",
+          "maxLength" : 30,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "AccountSourceSystem" : {
+          "type" : "string",
+          "description" : "Related Account Source System",
+          "maxLength" : 0,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "AccountSourceSystemReferenceValue" : {
+          "type" : "string",
+          "description" : "Related Account Source System Reference",
+          "maxLength" : 0,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "AccountName" : {
+          "type" : "string",
+          "description" : "Account",
+          "maxLength" : 360,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "PersonProfileId" : {
+          "type" : "integer",
+          "description" : "Contact ID",
+          "multipleOf" : 1,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "FirstName" : {
+          "type" : "string",
+          "description" : "First Name",
+          "maxLength" : 150,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "LastName" : {
+          "type" : "string",
+          "description" : "Last Name",
+          "maxLength" : 150,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "LastNamePrefix" : {
+          "type" : "string",
+          "description" : "Last Name Prefix",
+          "maxLength" : 30,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "MiddleName" : {
+          "type" : "string",
+          "description" : "Middle Name",
+          "maxLength" : 60,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "UniqueNameSuffix" : {
+          "type" : "string",
+          "description" : "Name Suffix",
+          "maxLength" : 540,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "ContactName" : {
+          "type" : "string",
+          "description" : "Name",
+          "maxLength" : 450,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "PreviousLastName" : {
+          "type" : "string",
+          "description" : "Previous Last Name",
+          "maxLength" : 150,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "SecondLastName" : {
+          "type" : "string",
+          "description" : "Second Last Name",
+          "maxLength" : 150,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "OwnerPartyId" : {
+          "type" : "integer",
+          "description" : "Owner Party ID",
+          "multipleOf" : 1,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "OwnerPartyNumber" : {
+          "type" : "string",
+          "description" : "Owner Party Number",
+          "maxLength" : 30,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "OwnerEmailAddress" : {
+          "type" : "string",
+          "description" : "Owner Email",
+          "maxLength" : 320,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "OwnerName" : {
+          "type" : "string",
+          "description" : "Owner",
+          "maxLength" : 360,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "SalesProfileNumber" : {
+          "type" : "string",
+          "description" : "Sales Account Number",
+          "maxLength" : 30,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "Type" : {
+          "type" : "string",
+          "description" : "Type",
+          "maxLength" : 30,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "ExistingCustomerFlag" : {
+          "type" : "boolean",
+          "description" : "Existing Sales Account",
+          "o:queryable" : false,
+          "o:sortable" : true
+        },
+        "ExistingCustomerFlagLastUpdateDate" : {
+          "type" : "string",
+          "description" : "Existing Indicator Last Update Date",
+          "o:queryable" : false,
+          "o:sortable" : true
+        },
+        "NamedFlag" : {
+          "type" : "boolean",
+          "description" : "Named Contact",
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "LastAssignmentDate" : {
+          "type" : "string",
+          "description" : "Last Assigned Date",
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "AssignmentExceptionFlag" : {
+          "type" : "boolean",
+          "description" : "Assignment Exception Indicator",
+          "o:queryable" : false,
+          "o:sortable" : true
+        },
+        "SalesProfileStatus" : {
+          "type" : "string",
+          "description" : "Status",
+          "maxLength" : 30,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "TaxpayerIdentificationNumber" : {
+          "type" : "string",
+          "description" : "Taxpayer Identification Number",
+          "maxLength" : 20,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "DateOfBirth" : {
+          "type" : "string",
+          "description" : "Date of Birth",
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "PlaceOfBirth" : {
+          "type" : "string",
+          "description" : "Place of Birth",
+          "maxLength" : 60,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "DateOfDeath" : {
+          "type" : "string",
+          "description" : "Date of Death",
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "DeceasedFlag" : {
+          "type" : "boolean",
+          "description" : "Person Deceased",
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "Gender" : {
+          "type" : "string",
+          "description" : "Gender",
+          "maxLength" : 30,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "MaritalStatus" : {
+          "type" : "string",
+          "description" : "Marital Status",
+          "maxLength" : 30,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "MaritalStatusEffectiveDate" : {
+          "type" : "string",
+          "description" : "Marital Status Effective Date",
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "DeclaredEthnicity" : {
+          "type" : "string",
+          "description" : "Declared Ethnicity",
+          "maxLength" : 60,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "PreferredFunctionalCurrency" : {
+          "type" : "string",
+          "description" : "Preferred Functional Currency",
+          "maxLength" : 15,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "PersonalIncomeAmount" : {
+          "type" : "number",
+          "description" : "Annual Income",
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "HeadOfHouseholdFlag" : {
+          "type" : "boolean",
+          "description" : "Head of Household Indicator",
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "HouseholdIncomeAmount" : {
+          "type" : "number",
+          "description" : "Household Income",
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "HouseholdSize" : {
+          "type" : "number",
+          "description" : "Household Size",
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "Salutation" : {
+          "type" : "string",
+          "description" : "Salutation",
+          "maxLength" : 60,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "SalutoryIntroduction" : {
+          "type" : "string",
+          "description" : "Prefix",
+          "maxLength" : 30,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "Title" : {
+          "type" : "string",
+          "description" : "Title",
+          "maxLength" : 60,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "AcademicTitle" : {
+          "type" : "string",
+          "description" : "Academic Title",
+          "maxLength" : 30,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "Initials" : {
+          "type" : "string",
+          "description" : "Initials",
+          "maxLength" : 20,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "RentOrOwnIndicator" : {
+          "type" : "string",
+          "description" : "Rent or Own Indicator",
+          "maxLength" : 30,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "CertificationLevel" : {
+          "type" : "string",
+          "description" : "Certification Level",
+          "maxLength" : 30,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "CertificationReasonCode" : {
+          "type" : "string",
+          "description" : "Certification Reason",
+          "maxLength" : 30,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "Comments" : {
+          "type" : "string",
+          "description" : "Comments",
+          "maxLength" : 2000,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "PreferredContactMethod" : {
+          "type" : "string",
+          "description" : "Preferred Contact Method",
+          "maxLength" : 30,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "FavoriteContactFlag" : {
+          "type" : "boolean",
+          "description" : "Favorite Contact",
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "Department" : {
+          "type" : "string",
+          "description" : "Department",
+          "maxLength" : 60,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "DepartmentCode" : {
+          "type" : "string",
+          "description" : "Department Code",
+          "maxLength" : 30,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "DoNotCallFlag" : {
+          "type" : "boolean",
+          "description" : "Do not call",
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "DoNotContactFlag" : {
+          "type" : "boolean",
+          "description" : "Do not contact",
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "DoNotEmailFlag" : {
+          "type" : "boolean",
+          "description" : "Do not e-mail",
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "DoNotMailFlag" : {
+          "type" : "boolean",
+          "description" : "Do not mail",
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "JobTitle" : {
+          "type" : "string",
+          "description" : "Job Title",
+          "maxLength" : 100,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "JobTitleCode" : {
+          "type" : "string",
+          "description" : "Job Title Code",
+          "maxLength" : 30,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "LastContactDate" : {
+          "type" : "string",
+          "description" : "Last Contact Date",
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "SalesAffinityCode" : {
+          "type" : "string",
+          "description" : "Affinity",
+          "maxLength" : 30,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "SalesBuyingRoleCode" : {
+          "type" : "string",
+          "description" : "Buying Role",
+          "maxLength" : 30,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "CurrencyCode" : {
+          "type" : "string",
+          "description" : "Currency Code",
+          "maxLength" : 15,
+          "o:queryable" : false,
+          "o:sortable" : true
+        },
+        "DataCloudStatus" : {
+          "type" : "string",
+          "description" : "Enrichment Status",
+          "maxLength" : 30,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "LastEnrichmentDate" : {
+          "type" : "string",
+          "description" : "Last Enrichment Date",
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "PartyStatus" : {
+          "type" : "string",
+          "maxLength" : 1,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "PartyType" : {
+          "type" : "string",
+          "description" : "Party Type",
+          "maxLength" : 30,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "CreatedByModule" : {
+          "type" : "string",
+          "description" : "Created by Application",
+          "maxLength" : 0,
+          "o:queryable" : false,
+          "o:sortable" : true
+        },
+        "CreatedBy" : {
+          "type" : "string",
+          "description" : "Created By",
+          "maxLength" : 64,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "CreationDate" : {
+          "type" : "string",
+          "description" : "Creation Date",
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "LastUpdateDate" : {
+          "type" : "string",
+          "description" : "Last Updated Date",
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "LastUpdateLogin" : {
+          "type" : "string",
+          "description" : "Last Update Login",
+          "maxLength" : 32,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "LastUpdatedBy" : {
+          "type" : "string",
+          "description" : "Last Updated By",
+          "maxLength" : 64,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "WorkPhoneContactPointType" : {
+          "type" : "string",
+          "description" : "Work Phone Type",
+          "maxLength" : 30,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "WorkPhoneCountryCode" : {
+          "type" : "string",
+          "description" : "Work Phone Country Code",
+          "maxLength" : 10,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "WorkPhoneAreaCode" : {
+          "type" : "string",
+          "description" : "Work Phone Area Code",
+          "maxLength" : 20,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "WorkPhoneNumber" : {
+          "type" : "string",
+          "description" : "Work Phone Number",
+          "maxLength" : 40,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "WorkPhoneExtension" : {
+          "type" : "string",
+          "description" : "Work Phone Extension",
+          "maxLength" : 20,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "FormattedWorkPhoneNumber" : {
+          "type" : "string",
+          "description" : "Work Phone",
+          "maxLength" : 0,
+          "o:queryable" : false,
+          "o:sortable" : true
+        },
+        "RawWorkPhoneNumber" : {
+          "type" : "string",
+          "description" : "Raw Work Phone Number",
+          "maxLength" : 60,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "MobileContactPointType" : {
+          "type" : "string",
+          "description" : "Mobile Type",
+          "maxLength" : 30,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "MobileCountryCode" : {
+          "type" : "string",
+          "description" : "Mobile Country Code",
+          "maxLength" : 10,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "MobileAreaCode" : {
+          "type" : "string",
+          "description" : "Mobile Area Code",
+          "maxLength" : 20,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "MobileNumber" : {
+          "type" : "string",
+          "description" : "Mobile Number",
+          "maxLength" : 40,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "MobileExtension" : {
+          "type" : "string",
+          "description" : "Mobile Extension",
+          "maxLength" : 20,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "FormattedMobileNumber" : {
+          "type" : "string",
+          "description" : "Mobile Phone",
+          "maxLength" : 0,
+          "o:queryable" : false,
+          "o:sortable" : true
+        },
+        "RawMobileNumber" : {
+          "type" : "string",
+          "description" : "Raw Mobile Number",
+          "maxLength" : 60,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "FaxContactPointType" : {
+          "type" : "string",
+          "description" : "Fax Type",
+          "maxLength" : 30,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "FaxCountryCode" : {
+          "type" : "string",
+          "description" : "Fax Country Code",
+          "maxLength" : 10,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "FaxAreaCode" : {
+          "type" : "string",
+          "description" : "Fax Area Code",
+          "maxLength" : 20,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "FaxNumber" : {
+          "type" : "string",
+          "description" : "Fax Number",
+          "maxLength" : 40,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "FaxExtension" : {
+          "type" : "string",
+          "description" : "Fax Extension",
+          "maxLength" : 20,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "FormattedFaxNumber" : {
+          "type" : "string",
+          "description" : "Formatted Fax Number",
+          "maxLength" : 0,
+          "o:queryable" : false,
+          "o:sortable" : true
+        },
+        "RawFaxNumber" : {
+          "type" : "string",
+          "description" : "Raw Fax Number",
+          "maxLength" : 60,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "HomePhoneContactPointType" : {
+          "type" : "string",
+          "description" : "Home Phone Type",
+          "maxLength" : 30,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "HomePhoneCountryCode" : {
+          "type" : "string",
+          "description" : "Home Phone Country Code",
+          "maxLength" : 10,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "HomePhoneAreaCode" : {
+          "type" : "string",
+          "description" : "Home Phone Area Code",
+          "maxLength" : 20,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "HomePhoneNumber" : {
+          "type" : "string",
+          "description" : "Home Phone Number",
+          "maxLength" : 40,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "FormattedHomePhoneNumber" : {
+          "type" : "string",
+          "description" : "Home Phone",
+          "maxLength" : 0,
+          "o:queryable" : false,
+          "o:sortable" : true
+        },
+        "RawHomePhoneNumber" : {
+          "type" : "string",
+          "description" : "Raw Home Phone Number",
+          "maxLength" : 60,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "EmailContactPointType" : {
+          "type" : "string",
+          "description" : "Email Type",
+          "maxLength" : 30,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "EmailFormat" : {
+          "type" : "string",
+          "description" : "E-Mail Format",
+          "maxLength" : 30,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "EmailAddress" : {
+          "type" : "string",
+          "description" : "E-Mail",
+          "maxLength" : 320,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "PrimaryAddressId" : {
+          "type" : "integer",
+          "multipleOf" : 1,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "PartyNumberKey" : {
+          "type" : "string",
+          "description" : "Registry ID",
+          "maxLength" : 30,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "SellToPartySiteId" : {
+          "type" : "integer",
+          "description" : "Sell to Address",
+          "multipleOf" : 1,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "ClassificationCategory" : {
+          "type" : "string",
+          "description" : "Classification Category",
+          "maxLength" : 0,
+          "o:queryable" : false,
+          "o:sortable" : true
+        },
+        "ClassificationCode" : {
+          "type" : "string",
+          "description" : "Classification Code",
+          "maxLength" : 0,
+          "o:queryable" : false,
+          "o:sortable" : true
+        },
+        "ContactIsPrimaryForAccount" : {
+          "type" : "string",
+          "description" : "Favorite",
+          "maxLength" : 0,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "NameSuffix" : {
+          "type" : "string",
+          "description" : "Suffix",
+          "maxLength" : 30,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "ContactUniqueName" : {
+          "type" : "string",
+          "description" : "Name",
+          "maxLength" : 900,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "RecordSet" : {
+          "type" : "string",
+          "description" : "Record Set",
+          "maxLength" : 30,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "SourceObjectType" : {
+          "type" : "string",
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "ContactRole" : {
+          "type" : "string",
+          "description" : "Contact Role",
+          "maxLength" : 60,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "RegistrationStatus" : {
+          "type" : "string",
+          "description" : "Registration Status",
+          "maxLength" : 30,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "UpdateFlag" : {
+          "type" : "boolean",
+          "description" : "Update Contact",
+          "o:queryable" : false,
+          "o:sortable" : true
+        },
+        "DeleteFlag" : {
+          "type" : "boolean",
+          "description" : "Delete Contact",
+          "o:queryable" : false,
+          "o:sortable" : true
+        },
+        "AddressNumber" : {
+          "type" : "string",
+          "description" : "Site Number",
+          "maxLength" : 30,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "AddressElementAttribute1" : {
+          "type" : "string",
+          "description" : "Additional Address Element 1",
+          "maxLength" : 150,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "AddressElementAttribute2" : {
+          "type" : "string",
+          "description" : "Additional Address Element 2",
+          "maxLength" : 150,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "AddressElementAttribute3" : {
+          "type" : "string",
+          "description" : "Additional Address Element 3",
+          "maxLength" : 150,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "AddressElementAttribute4" : {
+          "type" : "string",
+          "description" : "Additional Address Element 4",
+          "maxLength" : 150,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "AddressElementAttribute5" : {
+          "type" : "string",
+          "description" : "Additional Address Element 5",
+          "maxLength" : 150,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "AddressLine1" : {
+          "type" : "string",
+          "description" : "Address Line 1",
+          "maxLength" : 240,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "AddressLine2" : {
+          "type" : "string",
+          "description" : "Address Line 2",
+          "maxLength" : 240,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "AddressLine3" : {
+          "type" : "string",
+          "description" : "Address Line 3",
+          "maxLength" : 240,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "AddressLine4" : {
+          "type" : "string",
+          "description" : "Address Line 4",
+          "maxLength" : 240,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "Building" : {
+          "type" : "string",
+          "description" : "Building",
+          "maxLength" : 240,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "City" : {
+          "type" : "string",
+          "description" : "City",
+          "maxLength" : 60,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "Country" : {
+          "type" : "string",
+          "description" : "Country",
+          "maxLength" : 2,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "County" : {
+          "type" : "string",
+          "description" : "County",
+          "maxLength" : 60,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "FloorNumber" : {
+          "type" : "string",
+          "description" : "Floor Number",
+          "maxLength" : 40,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "PostalCode" : {
+          "type" : "string",
+          "description" : "Postal Code",
+          "maxLength" : 60,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "PostalPlus4Code" : {
+          "type" : "string",
+          "description" : "Postal Plus 4 Code",
+          "maxLength" : 20,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "Province" : {
+          "type" : "string",
+          "description" : "Province",
+          "maxLength" : 60,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "State" : {
+          "type" : "string",
+          "description" : "State",
+          "maxLength" : 60,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "Mailstop" : {
+          "type" : "string",
+          "description" : "Mail Stop",
+          "maxLength" : 60,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "AddressLinesPhonetic" : {
+          "type" : "string",
+          "description" : "Address Lines Phonetic",
+          "maxLength" : 560,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "AddressType" : {
+          "type" : "string",
+          "description" : "Address Type",
+          "maxLength" : 0,
+          "o:queryable" : true,
+          "o:sortable" : true
+        },
+        "OverallPrimaryFormattedPhoneNumber" : {
+          "type" : "string",
+          "description" : "Overall Primary Formatted Phone Number",
+          "maxLength" : 0,
+          "o:queryable" : false,
+          "o:sortable" : true
+        }
+      },
+      "required" : [ "PartyId", "PartyNumber", "AccountPartyNumber", "AccountName", "PersonProfileId", "OwnerPartyNumber", "OwnerName", "SalesProfileNumber", "DeceasedFlag", "PartyType", "CreatedBy", "CreationDate", "LastUpdateDate", "LastUpdatedBy", "WorkPhoneContactPointType", "MobileContactPointType", "FaxContactPointType", "HomePhoneContactPointType", "EmailContactPointType", "EmailAddress", "PartyNumberKey", "ContactUniqueName", "AddressNumber", "Country" ]
+    }
+- contacts-resource: |
+    {
+      "$schema" : "http://json-schema.org/draft-04/schema#",
+      "allOf" : [ {
+        "$ref" : "contacts-attributes"
+      }, {
+        "$ref" : "adf-resource"
+      } ]
+    }
+- contacts-resource-collection: |
+    {
+      "$schema" : "http://json-schema.org/draft-04/schema#",
+      "allOf" : [ {
+        "$ref" : "adf-resource-collection"
+      }, {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "contacts-resource"
+            }
+          }
+        }
+      } ]
+    }
+/contacts:
+  description: Contact
+  get:
+    description: List Contact
+    displayName: List Contact
+    queryParameters:
+      q:
+        displayName: Query Expression
+        description: Queries the resource collection using the expressions provided. For more information about expressions, see http://docs.oracle.com/cd/E21764_01/web.1111/b31974/web_search_bc.htm#BABBCJDC
+        type: string
+        required: false
+        repeat: false
+        example: Deptno>=10 and <= 30;Loc!=NY
+      offset:
+        displayName: Page Offset
+        description: Defines the starting position of the resource collection. If the offset value exceeds the resource count, then no resources are returned.
+        type: integer
+        required: false
+        repeat: false
+        default: '0'
+        example: '20'
+      limit:
+        displayName: Page Limit
+        description: Restricts the number of resources that are returned inside the resource collection. If the value of the limit exceeds the resource count, then the framework returns the available resources.
+        type: integer
+        required: false
+        repeat: false
+        example: '80'
+      orderBy:
+        displayName: Order By
+        description: Orders a resource collection based on its attributes. If asc or desc is not provided or an invalid value is provided, then asc is used as the default value.
+        type: string
+        required: false
+        repeat: false
+        example: attribute1:asc,attribute2
+      finder:
+        displayName: Finder
+        description: "The following finders are available:  \n\n1. findByPartyNumber:\n\
+          \t * Name: ContactPartyNumberRF\n\t * Attributes: \n\t\t * PartyNumber \
+          \ (string) \n\t * Usage: ContactPartyNumberRF;PartyNumber={string}\n2. myBusinessContacts:\n\
+          \t * Name: MyBusinessContacts\n\t * Attributes: \n\t * Usage: MyBusinessContacts\n\
+          3. myContacts:\n\t * Name: MyContacts\n\t * Attributes: \n\t\t * BindUserPartyId\
+          \  (integer) \n\t * Usage: MyContacts;BindUserPartyId={integer}\n4. myFavoriteContacts:\n\
+          \t * Name: MyFavoriteContacts\n\t * Attributes: \n\t * Usage: MyFavoriteContacts\n\
+          5. PartyIdAltKey:\n\t * Name: PartyIdAltKey\n\t * Attributes: \n\t\t * PartyId\
+          \  (integer) \n\t * Usage: PartyIdAltKey;PartyId={integer}\n6. PartyNumberAltKey:\n\
+          \t * Name: PartyNumberAltKey\n\t * Attributes: \n\t\t * PartyNumber  (string)\
+          \ \n\t * Usage: PartyNumberAltKey;PartyNumber={string}\n7. PrimaryKey:\n\
+          \t * Name: PrimaryKey\n\t * Attributes: \n\t\t * PartyId  (integer) \n\t\
+          \t * PersonProfileId  (integer) \n\t * Usage: PrimaryKey;PartyId={integer},PersonProfileId={integer}\n\
+          8. SourceSystemReferenceAltKey:\n\t * Name: SourceSystemReferenceAltKey\n\
+          \t * Attributes: \n\t\t * SourceSystem  (string) \n\t\t * SourceSystemReferenceValue\
+          \  (string) \n\t * Usage: SourceSystemReferenceAltKey;SourceSystem={string},SourceSystemReferenceValue={string}\n"
+        type: string
+        required: false
+        repeat: false
+        example: SourceSystemReferenceAltKey;SourceSystem={string},SourceSystemReferenceValue={string}
+      fields:
+        displayName: Fields
+        description: Filters the resource attributes. Only the specified attributes are returned.
+        type: string
+        required: false
+        repeat: false
+        example: Attribute1,Attribute2;<Nested_Resource>:Attribute1,Attribute2;<Nested_Resource>:Attribute1,Attribute2
+      expand:
+        displayName: Expand
+        description: 'If provided, includes the specified child resources in the resource
+          payload (instead of the link). '
+        type: string
+        required: false
+        repeat: false
+        example: Employees,Localizations,Employees.Managers
+      onlyData:
+        displayName: Only Data
+        description: Filters the resource payload to contain only data (for example, no links are included).
+        type: boolean
+        required: false
+        repeat: false
+        default: 'false'
+        example: 'true'
+      totalResults:
+        displayName: Total Results
+        description: Includes the estimated row count in the resource collection representation if the value is set to true.
+        type: boolean
+        required: false
+        repeat: false
+        default: 'false'
+        example: 'true'
+      dependency:
+        displayName: Dependency
+        description: Enables the ability to preview the effects of changes to attributes. Dependencies are the attributes that are set before generating the response and are rolled back after the response is generated.
+        type: string
+        required: false
+        repeat: false
+        example: <attr1>=<val1>,<attr2>=<value2>
+    responses:
+      '200':
+        body:
+          application/vnd.oracle.adf.resourcecollection+json:
+            schema: contacts-resource-collection
+          application/json:
+            schema: contacts-resource-collection
+  post:
+    description: Create Contact
+    displayName: Create Contact
+    body:
+      application/vnd.oracle.adf.resourceitem+json:
+        schema: contacts-attributes
+      application/json:
+        schema: contacts-attributes
+    responses:
+      '200':
+        body:
+          application/vnd.oracle.adf.resourceitem+json:
+            schema: contacts-resource-collection
+          application/json:
+            schema: contacts-resource-collection
+  /{contactsId}:
+    description: Contact
+    uriParameters:
+      contactsId:
+        displayName: Contact Id
+        type: string
+        required: true
+        repeat: false
+    get:
+      description: Return Contact
+      displayName: Return Contact
+      queryParameters:
+        orderBy:
+          displayName: Order By
+          description: Orders a resource collection based on its attributes. If asc or desc is not provided or an invalid value is provided, then asc is used as the default value.
+          type: string
+          required: false
+          repeat: false
+          example: attribute1:asc,attribute2
+        fields:
+          displayName: Fields
+          description: Filters the resource attributes. Only the specified attributes are returned.
+          type: string
+          required: false
+          repeat: false
+          example: Attribute1,Attribute2;<Nested_Resource>:Attribute1,Attribute2;<Nested_Resource>:Attribute1,Attribute2
+        expand:
+          displayName: Expand
+          description: 'If provided, includes the specified child resources in the
+            resource payload (instead of the link). '
+          type: string
+          required: false
+          repeat: false
+          example: Employees,Localizations,Employees.Managers
+        onlyData:
+          displayName: Only Data
+          description: Filters the resource payload to contain only data (for example, no links are included).
+          type: boolean
+          required: false
+          repeat: false
+          default: 'false'
+          example: 'true'
+        dependency:
+          displayName: Dependency
+          description: Enables the ability to preview the effects of changes to attributes. Dependencies are the attributes that are set before generating the response and are rolled back after the response is generated.
+          type: string
+          required: false
+          repeat: false
+          example: <attr1>=<val1>,<attr2>=<value2>
+      responses:
+        '200':
+          body:
+            application/json:
+              schema: contacts-resource
+            application/vnd.oracle.adf.resourceitem+json:
+              schema: contacts-resource
+    put:
+      description: Replace Contact
+      displayName: Replace Contact
+      body:
+        application/vnd.oracle.adf.resourceitem+json:
+          schema: contacts-attributes
+      responses:
+        '200':
+          body:
+            application/json:
+              schema: contacts-resource
+            application/vnd.oracle.adf.resourceitem+json:
+              schema: contacts-resource
+    patch:
+      description: Update Contact
+      displayName: Update Contact
+      body:
+        application/vnd.oracle.adf.resourceitem+json:
+          schema: contacts-attributes
+      responses:
+        '200':
+          body:
+            application/json:
+              schema: contacts-resource
+            application/vnd.oracle.adf.resourceitem+json:
+              schema: contacts-resource
+    delete:
+      description: Remove Contact
+      displayName: Remove Contact
+  /describe:
+    description: Contact Description
+    get:
+      description: Describe Contact
+      displayName: Describe Contact
+      responses:
+        '200':
+          body:
+            application/json: null
+            application/vnd.oracle.adf.description+json: null

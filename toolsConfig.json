@@ -1,0 +1,48 @@
+{
+    "apiName": "ContactAPI",
+    "apiVersion": "1",
+    "apiId": "a55aa321-30ca-4b09-bcb9-6f008b4e8fgff",
+    "baseUrl": "http://<MCS_SERVER>:<MCS_PORT>/",
+    "authorization": {
+        "mobileBackendID": "ea1c63ce-c2be-481b-9462-0982a6e06750",
+        "mobileBackendName": "Fusion_API_TEST",
+        "mobileBackendVersion": "1.0",
+        "anonymousKey": "RUhKWl9KVElPRENNQ1NfTU9CSUxFX0FOT05ZTU9VU19BUFBJRDpsel82aXl0Y241Z2pTZg==",
+        "oauth": {
+            "tokenEndpoint": "<MBE_OAUTH_TOKEN_ENDPOINT>",
+            "clientId": "<MBE_OAUTH_CLIENT_ID>",
+            "clientSecret": "<MBE_OAUTH_CLIENT_ID>"
+        }
+    },
+    "container": {
+        "oracleMobileApiName": "OracleMobileAPI",
+        "port": 4000
+    },
+    "deploy": {
+        "tempDirectory": "/tmp/mcs-deploy"
+    },
+    "tests": {
+        "getContacts": {
+            "method": "GET",
+            "resource": "/contacts"
+        },
+        "getContactsContactsId": {
+            "method": "GET",
+            "resource": "/contacts/:contactsId",
+            "uriParameters": {
+                "contactsId": "<PARAMETER_VALUE>"
+            }
+        },
+        "deleteContactsContactsId": {
+            "method": "DELETE",
+            "resource": "/contacts/:contactsId",
+            "uriParameters": {
+                "contactsId": "<PARAMETER_VALUE>"
+            }
+        },
+        "getContactsDescribe": {
+            "method": "GET",
+            "resource": "/contacts/describe"
+        }
+    }
+}
